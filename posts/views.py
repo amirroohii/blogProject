@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from .serializer import PostSerializer
 from .models import Post
 from rest_framework.response import Response
-from rest_framework import status, mixins, generics
+from rest_framework import status, mixins, generics,viewsets
 
 # Create your views here.
 
@@ -91,3 +91,8 @@ class CreateUpdateRetrieveDeleteView(generics.GenericAPIView,
 
     def destroy(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+class PostsViewSetView(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
