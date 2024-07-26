@@ -72,27 +72,6 @@ class PostRetrieveView(APIView):
         return Response(data=response, status=status.HTTP_200_OK)
 
 
-class CreateUpdateRetrieveDeleteView(generics.GenericAPIView,
-                                     mixins.CreateModelMixin,
-                                     mixins.RetrieveModelMixin,
-                                     mixins.UpdateModelMixin,
-                                     mixins.DestroyModelMixin):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-
-    def get(self, request: Request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def post(self, request: Request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-
 class PostsViewSetView(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
