@@ -8,3 +8,5 @@ from rest_framework import viewsets
 class PostsViewSetView(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+
