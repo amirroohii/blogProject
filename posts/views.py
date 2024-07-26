@@ -36,3 +36,37 @@ class PostsView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class PostRetrieveView(APIView):
+    serializer_class = PostSerializer
+    model = Post
+
+    def get(self, request: Request, pk):
+        instance = self.model.objects.get(id=pk)
+        serializer = self.serializer_class(instance=instance)
+        response = {
+            'message': f'Post {pk}',
+            'data': serializer.data
+        }
+        return Response(data=response, status=status.HTTP_200_OK)
+
+    def put(self, request: Request, pk):
+        instance = self.model.objects.get(id=pk)
+        data = request.data
+        serializer = self.serializer_class(data=data, instance=instance)
+
+        if serializer.is_valid():
+            serializer.save()
+            response = {
+                'message': 'Post updated successfully',
+                'data': serializer.data
+            }
+            return Response(data=response, status=status.HTTP_200_OK)
+        return Response(data=serializer.errors)
+
+    def delete(self, request: Request, pk):
+        instance = self.model.objects.get(id=pk)
+        instance.delete()
+        response = {
+            'message': 'Post deleted successfully',
+        }
+        return Response(data=response, status=status.HTTP_200_OK)
