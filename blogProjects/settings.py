@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'posts.apps.PostsConfig',
     'accounts.apps.AccountsConfig',
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
@@ -56,7 +58,14 @@ AUTH_USER_MODEL = "accounts.User"
 ROOT_URLCONF = 'blogProjects.urls'
 
 REST_FRAMEWORK = {
-    'NON_FIELD_ERRORS_KEY': 'errors'
+    'NON_FIELD_ERRORS_KEY': 'errors',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permission.IsAuthenticated'
+    )
 }
 
 TEMPLATES = [
