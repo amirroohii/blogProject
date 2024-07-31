@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from .serializer import PostSerializer
@@ -11,6 +12,7 @@ from rest_framework import status, generics, viewsets
 
 class PostsView(APIView):
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
     model = Post
 
     def get(self, request: Request):
@@ -38,6 +40,7 @@ class PostsView(APIView):
 
 class PostRetrieveView(APIView):
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
     model = Post
 
     def get(self, request: Request, pk):
