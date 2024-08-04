@@ -9,13 +9,12 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ['id', 'author', 'title']
 
-# class CurrentUserPostsSerializer(ModelSerializer):
-#     posts = serializers.HyperlinkedRelatedField(
-#         many=True, view_name='post detail', queryset=User.objects.all()
-#     )
-#
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email', 'posts']
+
+class AuthorPostDetailSerializer(serializers.ModelSerializer):
+    posts = serializers.HyperlinkedRelatedField(view_name='post-detail', queryset=User.objects.all(), many=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'posts']

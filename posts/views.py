@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.request import Request
-from .serializer import PostSerializer
+from .serializer import PostSerializer, AuthorPostDetailSerializer
 from .models import Post, User
 from rest_framework.response import Response
 from rest_framework import status, generics, viewsets, mixins
+
 
 # Create your views here.
 
@@ -25,7 +26,6 @@ class PostsView(APIView):
         }
         return Response(data=response, status=status.HTTP_200_OK)
 
-
     def post(self, request: Request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -37,6 +37,7 @@ class PostsView(APIView):
             }
             return Response(response, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PostRetrieveView(APIView):
     serializer_class = PostSerializer
@@ -74,6 +75,7 @@ class PostRetrieveView(APIView):
         }
         return Response(data=response, status=status.HTTP_200_OK)
 
+
 # class ListPostForAuthor(generics.GenericAPIView, mixins.ListModelMixin):
 #     queryset = Post.objects.all()
 #     serializer_class = PostSerializer
@@ -89,21 +91,19 @@ class ListPostForAuthorView(APIView):
         posts = self.get_post(request.user)
         serializer = self.serializer_class(instance=posts, many=True)
         response = {
-            'message': 'Author Posts',
+            'message': f'{str(request.user)} Posts',
             'posts': serializer.data
         }
         return Response(data=response, status=status.HTTP_200_OK)
 
-# @api_view(http_method_names=['GET'])
-# def user_post_list(request: Request):
-#     user = request.user
-#     post = Post.objects.filter(author=user)
-#     serializer = CurrentUserPostsSerializer(instance=post)
-#     response = {
-#         'message': 'Author posts',
-#         'posts': serializer.data
-#     }
-#     return Response(data=response, status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['GET'])
+@permission_classes([IsAuthenticated])
+def author_posts_detail(request: Request):
+    user = request.user
+    serializer = AuthorPostDetailSerializer(instance=user, context={'request': request})
+
+    return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class PostsViewSetView(viewsets.ModelViewSet):
