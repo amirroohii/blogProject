@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
@@ -7,6 +7,7 @@ from .serializer import PostSerializer, AuthorPostDetailSerializer
 from .models import Post, User
 from rest_framework.response import Response
 from rest_framework import status, generics, viewsets, mixins
+from .permissions import IsAuthorOrReadonly
 
 
 # Create your views here.
@@ -41,7 +42,7 @@ class PostsView(APIView):
 
 class PostRetrieveView(APIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthorOrReadonly, IsAuthenticated)
     model = Post
 
     def get(self, request: Request, pk):
@@ -49,14 +50,17 @@ class PostRetrieveView(APIView):
         serializer = self.serializer_class(instance=instance)
         response = {
             'message': f'Post {pk}',
-            'data': serializer.data
+            'data': serializer.data,
         }
         return Response(data=response, status=status.HTTP_200_OK)
 
     def put(self, request: Request, pk):
-        instance = self.model.objects.get(id=pk)
+        post = get_object_or_404(self.model, id=pk)
         data = request.data
-        serializer = self.serializer_class(data=data, instance=instance)
+        serializer = self.serializer_class(data=data, instance=post, partial=True)
+
+        if request.user != post.author:
+            return Response({'message': 'you are not allowed'})
 
         if serializer.is_valid():
             serializer.save()
@@ -69,11 +73,13 @@ class PostRetrieveView(APIView):
 
     def delete(self, request: Request, pk):
         instance = self.model.objects.get(id=pk)
-        instance.delete()
-        response = {
-            'message': 'Post deleted successfully',
-        }
-        return Response(data=response, status=status.HTTP_200_OK)
+        if request.user == instance.author or request.user.is_staff:
+            instance.delete()
+            response = {
+                'message': 'Post deleted successfully',
+            }
+            return Response(data=response, status=status.HTTP_200_OK)
+        return Response(data={'message': 'you are not allowed '})
 
 
 # class ListPostForAuthor(generics.GenericAPIView, mixins.ListModelMixin):
